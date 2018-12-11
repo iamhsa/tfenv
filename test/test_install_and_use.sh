@@ -12,6 +12,8 @@ function error_and_die() {
   exit 1
 }
 
+alphaRegex="^.*-alpha[0-9]"
+
 [ -n "$TFENV_DEBUG" ] && set -x
 source $(dirname $0)/helpers.sh \
   || error_and_die "Failed to load test helpers: $(dirname $0)/helpers.sh"
@@ -19,7 +21,7 @@ source $(dirname $0)/helpers.sh \
 echo "### Install latest version"
 cleanup || error_and_die "Cleanup failed?!"
 
-v=$(tfenv list-remote | head -n 1)
+v=$(tfenv list-remote | grep -v ${alphaRegex} | head -n 1)
 (
   tfenv install latest || exit 1
   check_version ${v} || exit 1
@@ -69,7 +71,7 @@ cleanup || error_and_die "Cleanup failed?!"
 if [ -f ${HOME}/.terraform-version ]; then
   mv ${HOME}/.terraform-version ${HOME}/.terraform-version.bup
 fi
-v=$(tfenv list-remote | head -n 2 | tail -n 1)
+v=$(tfenv list-remote | grep -v ${alphaRegex}  |head -n 2 | tail -n 1)
 echo "${v}" > ${HOME}/.terraform-version
 (
   tfenv install || exit 1
@@ -77,14 +79,14 @@ echo "${v}" > ${HOME}/.terraform-version
 ) || error_and_proceed "Installing ${HOME}/.terraform-version ${v}"
 
 echo "### Install with parameter and use ~/.terraform-version"
-v=$(tfenv list-remote | head -n 1)
+v=$(tfenv list-remote | grep -v ${alphaRegex} | head -n 1)
 (
   tfenv install ${v} || exit 1
   check_version ${v} || exit 1
 ) || error_and_proceed "Use $HOME/.terraform-version ${v}"
 
 echo "### Use with parameter and  ~/.terraform-version"
-v=$(tfenv list-remote | head -n 2 | tail -n 1)
+v=$(tfenv list-remote | grep -v ${alphaRegex} | head -n 2 | tail -n 1)
 (
   tfenv use ${v} || exit 1
   check_version ${v} || exit 1
