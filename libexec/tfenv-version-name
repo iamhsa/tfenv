@@ -10,11 +10,12 @@ source ${TFENV_ROOT}/libexec/helpers
 
 TFENV_VERSION_FILE="$(tfenv-version-file)"
 TFENV_VERSION="$(cat "${TFENV_VERSION_FILE}" || true)"
-
+alphaRegex="^.*-alpha[0-9]"
 if [[ "${TFENV_VERSION}" =~ ^latest.*$ ]]; then
   [[ "${TFENV_VERSION}" =~ ^latest\:.*$ ]] && regex="${TFENV_VERSION##*\:}"
   version="$(\ls "${TFENV_ROOT}/versions" \
     | sort -t'.' -k 1nr,1 -k 2nr,2 -k 3nr,3 \
+    | egrep -v "${alphaRegex}" \
     | grep -e "${regex}" \
     | head -n 1
   )"

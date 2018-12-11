@@ -35,11 +35,22 @@ fi
 [ -d "${TFENV_ROOT}/versions" ] \
   || error_and_die "No versions of terraform installed. Please install one with: tfenv install"
 
-version="$(\ls "${TFENV_ROOT}/versions" \
-  | sort -t'.' -k 1nr,1 -k 2nr,2 -k 3nr,3 \
-  | grep -e "${regex}" \
-  | head -n 1
-)"
+alphaRegex="^.*-alpha[0-9]"
+
+if [[ "${version_requested}" =~ ${alphaRegex} ]]; then
+  version="$(\ls "${TFENV_ROOT}/versions" \
+    | sort -t'.' -k 1nr,1 -k 2nr,2 -k 3nr,3 \
+    | grep -e "${regex}" \
+    | head -n 1
+  )"
+else
+  version="$(\ls "${TFENV_ROOT}/versions" \
+    | sort -t'.' -k 1nr,1 -k 2nr,2 -k 3nr,3 \
+    | grep -e "${regex}" \
+    | egrep -v "${alphaRegex}" \
+    | head -n 1
+  )"
+fi
 
 [ -n "${version}" ] || error_and_die "No installed versions of terraform matched '${1}'"
 
