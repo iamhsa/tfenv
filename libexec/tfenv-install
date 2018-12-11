@@ -27,6 +27,7 @@ if [[ "${version_requested}" =~ ^min-required$ ]]; then
     exit 1
   fi
 fi
+alphaRegex="^.*-alpha[0-9]"
 
 if [[ "${version_requested}" =~ ^latest\:.*$ ]]; then
   version="${version_requested%%\:*}"
@@ -40,7 +41,11 @@ else
 fi
 
 [ -n "${version}" ] || error_and_die "Version is not specified"
-version="$(tfenv-list-remote | grep -e "${regex}" | head -n 1)"
+if [[ ${version} == "latest" ]]; then
+  version="$(tfenv-list-remote | grep -e "${regex}" | grep -v ${alphaRegex} | head -n 1)"
+else
+  version="$(tfenv-list-remote | grep -e "${regex}" | head -n 1)"
+fi
 [ -n "${version}" ] || error_and_die "No versions matching '${1}' found in remote"
 
 dst_path="${TFENV_ROOT}/versions/${version}"
